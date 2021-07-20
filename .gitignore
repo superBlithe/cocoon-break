@@ -1,0 +1,14 @@
+node_modules
+dist
+.cache
+.vscode
+package-lock.json
+yarn.lock
+.DS_Store
+idea
+coverage/
+npm-debug.log
+selenium-debug.log
+yarn-error.log
+.buildrc.js
+.yarn
