@@ -26,9 +26,6 @@ export default class MainScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys()
     this.input.keyboard.on('keydown', this.onListenerKeyDown.bind(this))
     this.fpsText = new FpsText(this)
-    this.game
-    this.resetBtn = this.add.sprite(0, 1100, 'resetBtn').setOrigin(0, 0).setDepth(10).setInteractive()
-    this.resetBtn.on('pointerdown', this.resetGame, this)
     this.moveVec = new Phaser.Math.Vector2(0, 0)
     this.initGame()
   }
@@ -65,25 +62,36 @@ export default class MainScene extends Phaser.Scene {
     this.moveVec = vec
   }
 
-  /** 初始化果果 */
+  /** 生成水果的位置，不要出现在蛇的身上 */
+  private getNewFruitPos():IPOS {
+    let maxX = Math.floor(+this.game.config.width / CONFIG.BOX_SIZE)
+    let maxY = Math.floor(+this.game.config.height / CONFIG.BOX_SIZE / 3 * 2)
+    let x = Phaser.Math.Between(1, maxX) * CONFIG.BOX_SIZE
+    let y = Phaser.Math.Between(1, maxY) * CONFIG.BOX_SIZE
+    let isOnSnake = this.snakes.some(item => item.x === x && item.y === y)
+    return isOnSnake ? this.getNewFruitPos() : { x, y }
+  }
+
+  /** 随机果果 */
   private genneratorFruit() {
+    let pos = this.getNewFruitPos()
     let fruit = this.add
-      .sprite(Phaser.Math.Between(3, 10) * CONFIG.BOX_SIZE, Phaser.Math.Between(3, 10) * CONFIG.BOX_SIZE, 'fruit')
-      .setDisplaySize(CONFIG.BOX_SIZE, CONFIG.BOX_SIZE)
+      .sprite(pos.x, pos.y, 'fruit')
+      .setDisplaySize(CONFIG.BOX_SIZE, CONFIG.BOX_SIZE).setOrigin(0,0)
     this.fruits.push(fruit)
   }
 
   /** 初始化蛇蛇 */
   private initSnake() {
-    // 初始化 蛇 10个元素
+    // 初始化 蛇 4个元素, 从4， 4开始
     for (var i = 0; i < CONFIG.SNAKE_START_LENGTH; i++) {
-      this.snakes[i] = this.genneratorSnakeItem({ x: 150 + i * CONFIG.BOX_SIZE, y: 150 })
+      this.snakes[i] = this.genneratorSnakeItem({ x: (4 + i) * CONFIG.BOX_SIZE, y: 4 * CONFIG.BOX_SIZE })
     }
   }
 
   /** 生成蛇蛇的item */
   private genneratorSnakeItem(pos: IPOS) {
-    return this.add.sprite(pos.x, pos.y, 'snake').setDisplaySize(CONFIG.BOX_SIZE, CONFIG.BOX_SIZE)
+    return this.add.sprite(pos.x, pos.y, 'snake').setDisplaySize(CONFIG.BOX_SIZE, CONFIG.BOX_SIZE).setOrigin(0,0)
   }
 
   /** 吃到水果 */
@@ -110,10 +118,6 @@ export default class MainScene extends Phaser.Scene {
 
    /** 是否碰墙 */
   private checkWall(snakesFirst) {
-    console.log(this.game);
-    console.log(this);
-    console.log(this.scene);
-    
     let isCheckWall = snakesFirst.x >=  this.game.config.width  || snakesFirst.x < 0 || snakesFirst.y >= this.game.config.height || snakesFirst.y < 0;
     // 取个巧，找出坐标和蛇头一样的元素，因为蛇头肯定等于蛇头，所以要 匹配List>1
     if(isCheckWall) alert('撞墙啦')
