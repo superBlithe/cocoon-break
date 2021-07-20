@@ -1,134 +1,36 @@
-# 走进互动营销一：使用canvas引擎phaser实现一个推箱子h5游戏
-技术栈：`canvas`、`phaser`、`TS`
+# 走进互动营销二：使用phaserjs实现一个贪吃蛇
+技术栈：`canvas`、`phaser`、`TS` <br>
+本篇完成项目地址[完整代码](https://github.com/superBlithe/cocoon-break/tree/mooc/snake)
 
-canvas的一些小交互游戏是`互动营销`的重要表现方式。我们由浅入深逐步了解、掌握、熟悉h5游戏开发。
+听到实现个小游戏就很慌？`大可不必！` ，这要学不会，你来打我<br>
+今天还是初级文章，手把手带大家实现一个贪吃蛇。大佬绕过。你可以get：
+- phaserjs的简单使用
+- 一个游戏的模板仓库 phaser + ts + webpack5
+- 一条可爱的蛇蛇
 
+废话不多说，开干!
 
-> 推箱子小游戏是很多人的童年回忆，我们就用简单的代码来实现一下。
+## 一、分析需求(小伙子，别慌！)
 
-
-## 推箱子需求
-
-**思考:**
-1、需要一个代码开发环境.
-2、需要一个 canvas 引擎.
-3、需要准备一个人物来做我们的主人公,一个箱子,一个箱子推放的终点,一个燃烧的箱子,还有我们的游戏地图(墙体).
-
-
-## 一、基础环境搭建(TS+phaser)
-
-游戏引擎只是为了我们更好的使用`canvas`.
-有兴趣的同学可以了解下`pixi`, `egret`,`phaser`,`laya`,`cocos`,`fyge`(兑吧专用)等优秀的游戏引擎.其应用但不局限于游戏.
-由于暂未开源，这里我们使用`phaser`来实现这个小游戏。
-
-基础框架比较干净没有什么东西。down一个干净的模板。[phaser+ts项目模板](http://gitlab2.dui88.com/no.4/cocoon-break/tree/mooc/pushBox)
+**这个游戏可以拆成以下模块:**<br>
+- 一条可爱的蛇蛇
+- 随机生成的水果
+- wasd键盘控制上下左右
+- 吃水果动作
 
 
-## 二、加载静态资源
-> 首先,完成一个推箱子游戏,需要些什么?
+## 二、基础环境搭建(TS+phaser)
 
-### 1、准备素材
+### 基础框架
+比较干净没有什么东西。提前给大家准备了一个干净的模板。[phaser + ts + webpack5项目模板](https://github.com/superBlithe/cocoon-break/tree/temp/phaser)
 
-墙体,箱子,着火的箱子,箱子的终点,人物
+### 所需素材
+就两张方块图片，大家可以去完整的项目里面去下载。[完整代码](https://github.com/superBlithe/cocoon-break/tree/mooc/snake)
 
-### 2、编辑场景地图
+### 素材配置以及预加载图片 
+比较基础，不再赘述了，之前文章有 讲过。传送门[走进互动营销一：使用canvas引擎phaser实现一个推箱子h5游戏实战](https://juejin.cn/post/6969779221715501093)
 
-为了可扩展,我们选用 20*20 的二维数组来编辑我们的地图.
-定义数据映射关系.
-0 -- 背景
-1 -- 墙壁
-2 -- 地板
-3 -- 箱子
-4 -- 终点
-5 -- 人
-6 -- 着火的箱子
-
-- *src/constants/types.ts* 
-```typescript
-/** 格子 0 无 1 墙壁 2 地板 3 箱子 4 箱子终点 5 人 6 着火的箱子 */
-export enum BLOCK {
-    wall = 1,
-    ground = 2,
-    box = 3,
-    end = 4,
-    player = 5,
-    badBox = 6
-}
-```
-
-
-我们先来编辑第一关的地图.
-- *src/constants/config.ts* 
-```typescript
-export const LEVEL = {
-  LV_1: [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 1, 1, 1, 3, 2, 3, 4, 1, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 1, 4, 2, 3, 5, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-]
-}
-```
-
-
-### 3、创建素材配置文件
-
-- *src/constants/config.ts* 并将提前准备好的几个素材定义好
-```typescript
-/** 资源配置 */
-export const RES = {
-  wall: "//yun.duiba.com.cn/spark/assets/5fe60952f141c695902a1a7428bc4bb1c254627c.jpeg",
-  box: "//yun.duiba.com.cn/spark/assets/c68150a7c6c0aaa9c88d64ac4ea51f26d9dfb386.jpeg",
-  end: "//yun.duiba.com.cn/spark/assets/9aa5d0732bea222d58347bf435e7f67a851b9fc1.png",
-  player: "//yun.duiba.com.cn/spark/assets/74a309f60978ba65bba21915ec75b2e9310dcc75.png",
-  badBox: "//yun.duiba.com.cn/spark/assets/de6a7e6f261e74568acffe56ebe5bf8ffe5f49b2.png",
-  resetBtn: "//yun.duiba.com.cn/spark/assets/c684fbca6528b566d2e65b9c491b9a23773b9aed.png"
-}
-```
-### 4、预加载静态图片
-- *src/scenes/preloadScene.ts*
-```typescript
-import { RES } from '../constants/config'
-
-export default class PreloadScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'PreloadScene' })
-  }
-
-  preload() {
-    // RES.map(item =>)
-    for (const key in RES) {
-      if (Object.prototype.hasOwnProperty.call(RES, key)) {
-        this.load.image(key, RES[key])
-      }
-    }
-  }
-
-  create() {
-    this.scene.start('MainScene')
-  }
-}
-
-```
-
-
-## 三、搭建简单的舞台
+## 三、新建游戏场景
 新建 *src/scenes/mainScene.ts*
 
 创建主场景`MainScene`;

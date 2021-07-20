@@ -1,15 +1,11 @@
 import FpsText from '../objects/fpsText'
-import { GUtils } from '../constants/util'
-import { DIR, BLOCK, KEY_DIR, IPOS } from '../constants/types'
+import { KEY_DIR, IPOS } from '../constants/types'
 import { CONFIG } from '../constants/config'
 
 export default class MainScene extends Phaser.Scene {
   fpsText
   /** 鼠标事件 */
   public cursors: Phaser.Types.Input.Keyboard.CursorKeys
-  private resetBtn: Phaser.GameObjects.Sprite
-  /** 方向 */
-  private dir: DIR = DIR.UP
   /** 蛇蛇 */
   private snakes: Phaser.GameObjects.Sprite[] = []
   /** 果果 */
@@ -17,7 +13,6 @@ export default class MainScene extends Phaser.Scene {
   /** 方向 */
   private moveVec: Phaser.Math.Vector2
   private updateDelay: number = 0
-  private speed: number = 10
   constructor() {
     super({ key: 'MainScene' })
   }

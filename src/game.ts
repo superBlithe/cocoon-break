@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-07-18 22:04:30
- * @LastEditTime: 2021-07-20 09:11:28
+ * @LastEditTime: 2021-07-20 22:58:19
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \project\snake\src\game.ts
