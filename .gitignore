@@ -1,0 +1,7 @@
+﻿# project ignores
+node_modules
+released
+.DS_Store
+.idea
+output.js
+output.js.map
